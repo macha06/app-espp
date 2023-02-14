@@ -3,7 +3,9 @@
 use App\Http\Controllers\BerandaPetugasController;
 use App\Http\Controllers\BerandaSiswaController;
 use App\Http\Controllers\BerandaAdminController;
+use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WaliController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +42,8 @@ Route::prefix('admin')->middleware(['auth', 'auth.admin'])->group(function () {
     //ini route untuk admin
     Route::get('beranda', [BerandaAdminController::class, 'index'])->name('admin.beranda');
     Route::resource('user', UserController::class);
+    Route::resource('wali' , WaliController::class);
+    Route::resource('siswa' , SiswaController::class);
 });
 
 Route::get('logout', function () {

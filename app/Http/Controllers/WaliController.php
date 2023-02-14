@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User as model;
 
-class UserController extends Controller
+class WaliController extends Controller
 {
     private $viewIndex = 'user_index';
     private $viewCreate = 'user_form';
     private $viewEdit = 'user_form';
     private $viewShow = 'user_show';
-    private $routePrefix = 'user';
+    private $routePrefix = 'wali';
     /**
      * Display a listing of the resource.
      *
@@ -22,13 +22,12 @@ class UserController extends Controller
              
         return view('admin.'. $this->viewIndex, [
             'models' => Model::where([
-                ['akses', '<>', 'siswa'],
-                ['akses', '<>', 'admin'],
+                ['akses','siswa']
             ])
                 ->latest()
                 ->paginate(50),
             'routePrefix' => $this->routePrefix,
-            'title' => 'Data Petugas'
+            'title' => 'Data Akun Siswa'
         ]);
     }
 
@@ -44,7 +43,7 @@ class UserController extends Controller
             'method' => 'POST',
             'route' => $this->routePrefix.'.store',
             'button' => 'SIMPAN',
-            'title' => 'Form Data Petugas'
+            'title' => 'Form Data akun Siswa'
         ];
         return view('admin.'. $this->viewCreate, $data);
     }
@@ -61,11 +60,11 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|unique:users',
             'nohp' => 'required|unique:users',
-            'akses' => 'required|in:petugas,admin',
             'password' => 'required'
         ]);
         $requestData['password'] = bcrypt($requestData['password']);
         $requestData['email_verified_at'] = now();
+        $requestData['akses'] = 'siswa';
         Model::create($requestData);
         flash('Data Berhasil disimpan');
         return back();
@@ -95,7 +94,7 @@ class UserController extends Controller
             'method' => 'PUT',
             'route' => [$this->routePrefix.'.update', $id],
             'button' => 'UPDATE',
-            'title' => 'Form Edit Data Petugas'
+            'title' => 'Form Edit Data Akun Siswa'
         ];
         return view('admin.'.$this->viewEdit, $data);
     }
@@ -113,7 +112,6 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|unique:users,email,'.$id,
             'nohp' => 'required|unique:users,nohp,'.$id,
-            'akses' => 'required|in:petugas,admin',
             'password' => 'nullable'
         ]);
         $model = Model::findOrFail($id);
@@ -125,7 +123,7 @@ class UserController extends Controller
         $model->fill($requestData);
         $model->save();
         flash('Data Berhasil disimpan');
-        return redirect()->route('user.index');
+        return redirect()->route('wali.index');
     }
 
     /**
@@ -136,13 +134,7 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        $model = Model::findOrFail($id);
-
-        if ($model->email == 'petugas@petugas.com') {
-            flash('Data Tidak bisa dihapus')->error();
-            return back();
-        }
-
+        $model = Model::where('akses', 'siswa')->firstOrFail();
         $model->delete();
         flash('Data berhasil dihapus');
         return back();
